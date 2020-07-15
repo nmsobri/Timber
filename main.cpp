@@ -11,7 +11,7 @@ int main() {
     sf::VideoMode vm(SCREEN_WIDTH, SCREEN_HEIGHT);
 
     /* Create window object and open a window */
-    sf::RenderWindow window(vm, "Timber", sf::Style::Fullscreen);
+    sf::RenderWindow window(vm, "Timber", sf::Style::Default);
 
     sf::Texture textureBackground;
     sf::Texture textureTree;
@@ -70,6 +70,10 @@ int main() {
 
     spriteBackground.setPosition(0, 0);
     spriteTree.setPosition(810, 0);
+    spriteBee.setPosition(-500, 0);
+    spriteCloud1.setPosition(-500, 0);
+    spriteCloud2.setPosition(-500, 0);
+    spriteCloud3.setPosition(-500, 0);
 
     bool isBeeActive = false;
     float beeSpeed = 0.0f;
@@ -98,12 +102,27 @@ int main() {
         * Handle player input
         * *****************************************
         */
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape)) {
-            window.close();
-        }
 
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Enter)) {
-            isPaused = !isPaused;
+        /* Check all the window's events that were triggered since the last iteration of the loop */
+        sf::Event event;
+        while (window.pollEvent(event)) {
+            switch (event.type) {
+                case sf::Event::Closed:
+                    window.close();
+                    break;
+
+                case sf::Event::KeyPressed:
+                    if (event.key.code == sf::Keyboard::Escape) {
+                        window.close();
+                    }
+
+                    if (event.key.code == sf::Keyboard::Enter) {
+                        isPaused = !isPaused;
+                    }
+
+                default:
+                    break;
+            }
         }
 
         /*
@@ -174,32 +193,32 @@ int main() {
                     isCloud3Active = false;
                 }
             }
-
-            /*
-            *******************************************
-            * Draw scene
-            *******************************************
-            */
-
-            /* Clear everything from last frame*/
-            window.clear();
-
-            /* Draw our scene here*/
-            window.draw(spriteBackground);
-            window.draw(spriteCloud1);
-            window.draw(spriteCloud2);
-            window.draw(spriteCloud3);
-            window.draw(spriteTree);
-            window.draw(spriteBee);
-            window.draw(textScore);
-
-            if (isPaused) {
-                window.draw(textMessage);
-            }
-
-            /* Render what we just drew*/
-            window.display();
         }
+
+        /*
+        *******************************************
+        * Draw scene
+        *******************************************
+        */
+
+        /* Clear everything from last frame*/
+        window.clear();
+
+        /* Draw our scene here*/
+        window.draw(spriteBackground);
+        window.draw(spriteCloud1);
+        window.draw(spriteCloud2);
+        window.draw(spriteCloud3);
+        window.draw(spriteTree);
+        window.draw(spriteBee);
+        window.draw(textScore);
+
+        if (isPaused) {
+            window.draw(textMessage);
+        }
+
+        /* Render what we just drew*/
+        window.display();
     }
     return 0;
 }
