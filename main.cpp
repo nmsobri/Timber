@@ -3,48 +3,9 @@
 #include <array>
 #include <iostream>
 #include <string>
-
-const int SCREEN_WIDTH = 1920;
-const int SCREEN_HEIGHT = 1080;
-
-const float TIMEBAR_WIDTH = 300;
-const float TIMEBAR_HEIGHT = 60;
-
-const float GAME_TIME = 60.0f;
-const int NUM_BRANCHES = 6;
-
-/* Player side, left or right */
-enum class Side {
-    LEFT,
-    RIGHT,
-    NONE
-};
-
-/* Function definition */
-void updateBranches(int seed, std::array<Side, NUM_BRANCHES>& branchPositions) {
-    // Move all the branches down one place
-    for (int j = NUM_BRANCHES - 1; j > 0; j--) {
-        branchPositions[j] = branchPositions[j - 1];
-    }
-
-    // Spawn a new branch at position 0
-    srand((int)time(0) + seed);
-    int r = (rand() % 5);
-
-    switch (r) {
-        case 0:
-            branchPositions[0] = Side::LEFT;
-            break;
-
-        case 1:
-            branchPositions[0] = Side::RIGHT;
-            break;
-
-        default:
-            branchPositions[0] = Side::NONE;
-            break;
-    }
-}
+#include "Game.h"
+#include "Sound.h"
+#include "Sprite.h"
 
 int main() {
     /* Create video mode */
@@ -53,35 +14,35 @@ int main() {
     /* Create window object and open a window */
     sf::RenderWindow window(vm, "Timber", sf::Style::Fullscreen);
 
-    sf::Texture textureBackground;
-    sf::Texture textureTree;
-    sf::Texture textureCloud;
-    sf::Texture textureBee;
-    sf::Texture textureBranch;
-    sf::Texture texturePlayer;
-    sf::Texture textureAxe;
-    sf::Texture textureLog;
-    sf::Texture textureRip;
+    game::Sprite spriteBackground("asset/graphic/background.png", 0, 0);
+    game::Sprite spriteTree("asset/graphic/tree.png", 810, 0);
+    game::Sprite spriteBee("asset/graphic/bee.png", -500, 0);
+    game::Sprite spriteCloud1("asset/graphic/cloud.png", -500, 0);
+    game::Sprite spriteCloud2("asset/graphic/cloud.png", -500, 0);
+    game::Sprite spriteCloud3("asset/graphic/cloud.png", -500, 0);
 
-    sf::Sprite spriteBackground;
-    sf::Sprite spriteTree;
-    sf::Sprite spriteBee;
-    sf::Sprite spriteCloud1;
-    sf::Sprite spriteCloud2;
-    sf::Sprite spriteCloud3;
-    std::array<sf::Sprite, NUM_BRANCHES> spriteBranches;
-    sf::Sprite spritePlayer;
-    sf::Sprite spriteAxe;
-    sf::Sprite spriteLog;
-    sf::Sprite spriteRip;
+    std::array<game::Sprite, NUM_BRANCHES> spriteBranches = {
+        game::Sprite("asset/graphic/branch.png", -500, 0),
+        game::Sprite("asset/graphic/branch.png", -500, 0),
+        game::Sprite("asset/graphic/branch.png", -500, 0),
+        game::Sprite("asset/graphic/branch.png", -500, 0),
+        game::Sprite("asset/graphic/branch.png", -500, 0),
+        game::Sprite("asset/graphic/branch.png", -500, 0)};
 
-    sf::SoundBuffer sbChop;
-    sf::SoundBuffer sbDeath;
-    sf::SoundBuffer sbOutOfTime;
+    for (int i = 0; i < NUM_BRANCHES; i++) {
+        // Set the sprite's origin to dead centre
+        // We can then spin it round without changing its position
+        spriteBranches[i].setOrigin(220, 20);
+    }
 
-    sf::Sound soundChop;
-    sf::Sound soundDeath;
-    sf::Sound soundOutOfTime;
+    game::Sprite spritePlayer("asset/graphic/player.png", -500, 0);
+    game::Sprite spriteAxe("asset/graphic/axe.png", -500, 0);
+    game::Sprite spriteLog("asset/graphic/log.png", -500, 0);
+    game::Sprite spriteRip("asset/graphic/rip.png", -500, 0);
+
+    game::Sound soundChop("asset/sound/chop.wav");
+    game::Sound soundDeath("asset/sound/death.wav");
+    game::Sound soundOutOfTime("asset/sound/out_of_time.wav");
 
     sf::Font fontFile;
     sf::Text textMessage;
@@ -96,25 +57,7 @@ int main() {
     std::array<bool, sf::Keyboard::KeyCount> previousKeyState;
     previousKeyState.fill(false);
 
-    textureBackground.loadFromFile("asset/graphic/background.png");
-    textureTree.loadFromFile("asset/graphic/tree.png");
-    textureCloud.loadFromFile("asset/graphic/cloud.png");
-    textureBee.loadFromFile("asset/graphic/bee.png");
-    textureBranch.loadFromFile("asset/graphic/branch.png");
-    texturePlayer.loadFromFile("asset/graphic/player.png");
-    textureAxe.loadFromFile("asset/graphic/axe.png");
-    textureLog.loadFromFile("asset/graphic/log.png");
-    textureRip.loadFromFile("asset/graphic/rip.png");
-
     fontFile.loadFromFile("asset/font/komikap.ttf");
-
-    sbChop.loadFromFile("asset/sound/chop.wav");
-    sbDeath.loadFromFile("asset/sound/death.wav");
-    sbOutOfTime.loadFromFile("asset/sound/out_of_time.wav");
-
-    soundChop.setBuffer(sbChop);
-    soundDeath.setBuffer(sbDeath);
-    soundOutOfTime.setBuffer(sbOutOfTime);
 
     textMessage.setFont(fontFile);
     textScore.setFont(fontFile);
@@ -138,37 +81,6 @@ int main() {
 
     textScore.setPosition(20, 20);
     textMessage.setPosition(SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f);
-
-    spriteBackground.setTexture(textureBackground);
-    spriteTree.setTexture(textureTree);
-    spriteBee.setTexture(textureBee);
-    spriteCloud1.setTexture(textureCloud);
-    spriteCloud2.setTexture(textureCloud);
-    spriteCloud3.setTexture(textureCloud);
-    spritePlayer.setTexture(texturePlayer);
-    spriteAxe.setTexture(textureAxe);
-    spriteLog.setTexture(textureLog);
-    spriteRip.setTexture(textureRip);
-
-    /* Set the texture for each branch sprite */
-    for (int i = 0; i < NUM_BRANCHES; i++) {
-        spriteBranches[i].setTexture(textureBranch);
-        spriteBranches[i].setPosition(-2000, -2000);
-
-        // Set the sprite's origin to dead centre
-        // We can then spin it round without changing its position
-        spriteBranches[i].setOrigin(220, 20);
-    }
-
-    spriteBackground.setPosition(0, 0);
-    spriteTree.setPosition(810, 0);
-    spriteBee.setPosition(-500, 0);
-    spriteCloud1.setPosition(-500, 0);
-    spriteCloud2.setPosition(-500, 0);
-    spriteCloud3.setPosition(-500, 0);
-    spritePlayer.setPosition(-500, 0);
-    spriteAxe.setPosition(-500, 0);
-    spriteLog.setPosition(-500, 0);
 
     sf::RectangleShape rectTimeBar;
     rectTimeBar.setSize(sf::Vector2f(TIMEBAR_WIDTH, TIMEBAR_HEIGHT));
