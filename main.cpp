@@ -18,9 +18,20 @@ int main() {
     game::Sprite spriteBackground("asset/graphic/background.png", 0, 0);
     game::Sprite spriteTree("asset/graphic/tree.png", 810, 0);
     game::Sprite spriteBee("asset/graphic/bee.png", -500, 0);
-    game::Sprite spriteCloud1("asset/graphic/cloud.png", -500, 0);
-    game::Sprite spriteCloud2("asset/graphic/cloud.png", -500, 0);
-    game::Sprite spriteCloud3("asset/graphic/cloud.png", -500, 0);
+
+    std::array<game::Sprite, NUM_CLOUDS> clouds = {
+        game::Sprite("asset/graphic/cloud.png", -500, 0),
+        game::Sprite("asset/graphic/cloud.png", -500, 0),
+        game::Sprite("asset/graphic/cloud.png", -500, 0),
+        game::Sprite("asset/graphic/cloud.png", -500, 0),
+        game::Sprite("asset/graphic/cloud.png", -500, 0),
+    };
+
+    std::array<Tree, NUM_TREES> trees = {
+        Tree{{"asset/graphic/tree.png", 150, 0}, 0.88},
+        Tree{{"asset/graphic/tree.png", 450, 0}, 0.77},
+        Tree{{"asset/graphic/tree.png", 1450, 0}, 0.77},
+    };
 
     std::array<game::Sprite, NUM_BRANCHES> spriteBranches = {
         game::Sprite("asset/graphic/branch.png", -500, 0),
@@ -28,7 +39,8 @@ int main() {
         game::Sprite("asset/graphic/branch.png", -500, 0),
         game::Sprite("asset/graphic/branch.png", -500, 0),
         game::Sprite("asset/graphic/branch.png", -500, 0),
-        game::Sprite("asset/graphic/branch.png", -500, 0)};
+        game::Sprite("asset/graphic/branch.png", -500, 0),
+    };
 
     for (int i = 0; i < NUM_BRANCHES; i++) {
         /* Set the sprite's origin to dead centre, we can then spin it round without changing its position */
@@ -100,6 +112,7 @@ int main() {
 
                     if (event.key.code == sf::Keyboard::Left && !previousKeyState[sf::Keyboard::Left]) {
                         score++;
+                        remainingTime += 0.10;
                         spriteLog.active(true);
                         playerSide = Side::LEFT;
 
@@ -113,6 +126,7 @@ int main() {
 
                     if (event.key.code == sf::Keyboard::Right && !previousKeyState[sf::Keyboard::Right]) {
                         score++;
+                        remainingTime += 0.10;
                         spriteLog.active(true);
                         playerSide = Side::RIGHT;
 
@@ -200,49 +214,20 @@ int main() {
                 }
             }
 
-            if (!spriteCloud1.active()) {
-                srand(time(0) * 10);
-                float cloudHeight = (rand() % 200);
-                spriteCloud1.setPosition(-500, cloudHeight);
-                spriteCloud1.active(true);
-                spriteCloud1.speed((rand() % 100) * 2);
-            } else {
-                auto cloud1XPos = deltaTime.asSeconds() * spriteCloud1.speed();
-                spriteCloud1.setPosition(spriteCloud1.getPosition().x + cloud1XPos, spriteCloud1.getPosition().y);
+            for (int i = 0; i < clouds.size(); i++) {
+                if (!clouds[i].active()) {
+                    srand(time(0) * (10 + i));
+                    float cloudHeight = (rand() % 200);
+                    clouds[i].setPosition(-500, cloudHeight);
+                    clouds[i].active(true);
+                    clouds[i].speed((rand() % 100) * 2);
+                } else {
+                    auto cloudXPos = deltaTime.asSeconds() * clouds[i].speed();
+                    clouds[i].setPosition(clouds[i].getPosition().x + cloudXPos, clouds[i].getPosition().y);
 
-                if (spriteCloud1.getPosition().x > SCREEN_WIDTH) {
-                    spriteCloud1.active(false);
-                }
-            }
-
-            if (!spriteCloud2.active()) {
-                srand(time(0) * 20);
-                float cloudHeight = (rand() % 200);
-                spriteCloud2.setPosition(-500, cloudHeight);
-                spriteCloud2.active(true);
-                spriteCloud2.speed((rand() % 100) * 2);
-            } else {
-                auto cloud2XPos = deltaTime.asSeconds() * spriteCloud2.speed();
-                spriteCloud2.setPosition(spriteCloud2.getPosition().x + cloud2XPos, spriteCloud2.getPosition().y);
-
-                if (spriteCloud2.getPosition().x > SCREEN_WIDTH) {
-                    spriteCloud2.active(false);
-                }
-            }
-
-            if (!spriteCloud3.active()) {
-                srand(time(0) * 30);
-                float cloud3Height = (rand() % 200);
-                spriteCloud3.setPosition(-500, cloud3Height);
-                spriteCloud3.active(true);
-                spriteCloud3.speed((rand() % 100) * 2);
-
-            } else {
-                auto cloud3XPos = deltaTime.asSeconds() * spriteCloud3.speed();
-                spriteCloud3.setPosition(spriteCloud3.getPosition().x + cloud3XPos, spriteCloud3.getPosition().y);
-
-                if (spriteCloud3.getPosition().x > SCREEN_WIDTH) {
-                    spriteCloud3.active(false);
+                    if (clouds[i].getPosition().x > SCREEN_WIDTH) {
+                        clouds[i].active(false);
+                    }
                 }
             }
 
@@ -331,9 +316,16 @@ int main() {
 
         /* Draw our scene here*/
         window.draw(spriteBackground);
-        window.draw(spriteCloud1);
-        window.draw(spriteCloud2);
-        window.draw(spriteCloud3);
+
+        for (int i = 0; i < 3; i++) {
+            trees[i].tree.setScale(0.4, trees[i].scale);
+            window.draw(trees[i].tree);
+        }
+
+        for (int i = 0; i < clouds.size(); i++) {
+            window.draw(clouds[i]);
+        }
+
         window.draw(spriteTree);
         window.draw(spriteLog);
         window.draw(spriteBee);
@@ -342,7 +334,7 @@ int main() {
         window.draw(spritePlayer);
 
         /* Draw the branches */
-        for (int i = 0; i < NUM_BRANCHES; i++) {
+        for (int i = 0; i < spriteBranches.size(); i++) {
             window.draw(spriteBranches[i]);
         }
 

@@ -1,3 +1,6 @@
+#pragma once
+#include "Sprite.h"
+
 const int SCREEN_WIDTH = 1920;
 const int SCREEN_HEIGHT = 1080;
 
@@ -6,12 +9,19 @@ const float TIMEBAR_HEIGHT = 60;
 
 const float GAME_TIME = 15.0f;
 const int NUM_BRANCHES = 6;
+const int NUM_CLOUDS = 5;
+const int NUM_TREES = 3;
 
 /* Player side, left or right */
 enum class Side {
     LEFT,
     RIGHT,
     NONE
+};
+
+struct Tree {
+    game::Sprite tree;
+    float scale;
 };
 
 /* Function definition */
