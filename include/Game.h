@@ -4,7 +4,7 @@ const int SCREEN_HEIGHT = 1080;
 const float TIMEBAR_WIDTH = 300;
 const float TIMEBAR_HEIGHT = 60;
 
-const float GAME_TIME = 60.0f;
+const float GAME_TIME = 15.0f;
 const int NUM_BRANCHES = 6;
 
 /* Player side, left or right */
